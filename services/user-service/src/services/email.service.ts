@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 5000,  // 5s bağlantı timeout
+  greetingTimeout:   5000,  // 5s greeting timeout
+  socketTimeout:     10000, // 10s işlem timeout
 });
 
 export async function sendVerificationEmail(

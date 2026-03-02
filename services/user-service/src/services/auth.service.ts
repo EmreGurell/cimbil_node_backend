@@ -42,7 +42,10 @@ export async function register(
     },
   });
 
-  await sendVerificationEmail(email, firstName, code);
+  // Fire-and-forget — response'u bloke etme, email arka planda gönderilir
+  sendVerificationEmail(email, firstName, code).catch((err) => {
+    console.error('[register] Email send failed:', err.message);
+  });
 
   return { message: 'Verification email sent', userId: user.id };
 }
@@ -114,7 +117,9 @@ export async function resendCode(userId: string) {
     },
   });
 
-  await sendVerificationEmail(user.email, user.firstName, code);
+  sendVerificationEmail(user.email, user.firstName, code).catch((err) => {
+    console.error('[resendCode] Email send failed:', err.message);
+  });
 
   return { message: 'Verification code resent' };
 }
@@ -174,7 +179,9 @@ export async function forgotPassword(email: string) {
     },
   });
 
-  await sendPasswordResetEmail(email, user.firstName, code);
+  sendPasswordResetEmail(email, user.firstName, code).catch((err) => {
+    console.error('[forgotPassword] Email send failed:', err.message);
+  });
 
   return { message: 'Reset code sent if email exists' };
 }
