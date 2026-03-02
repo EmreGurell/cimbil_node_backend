@@ -1,0 +1,162 @@
+{
+  "info": {
+    "name": "Cimbil — Nutrition Service",
+    "_postman_id": "cimbil-nutrition-service-v1",
+    "description": "Nutrition Service endpoint'leri. BASE_URL: http://localhost:8080 (API Gateway). TOKEN'ı user service testinden al.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:8080" },
+    { "key": "TOKEN",    "value": "" },
+    { "key": "LOG_ID",   "value": "" }
+  ],
+  "item": [
+    {
+      "name": "🥗 Nutrition Log",
+      "item": [
+        {
+          "name": "1. Log Ekle (breakfast)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data.id) {",
+                  "  pm.collectionVariables.set('LOG_ID', json.data.id);",
+                  "  console.log('LOG_ID set:', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/nutrition/log",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodName\": \"Yulaf Ezmesi\",\n  \"calories\": 350,\n  \"protein\": 12,\n  \"carbs\": 55,\n  \"fat\": 7,\n  \"fiber\": 5,\n  \"mealType\": \"breakfast\",\n  \"date\": \"2026-03-02\",\n  \"source\": \"manual\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Log Ekle (lunch)",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/nutrition/log",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodName\": \"Izgara Tavuk\",\n  \"calories\": 280,\n  \"protein\": 35,\n  \"carbs\": 0,\n  \"fat\": 8,\n  \"fiber\": 0,\n  \"mealType\": \"lunch\",\n  \"date\": \"2026-03-02\",\n  \"source\": \"manual\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Güne Göre Getir",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/nutrition/get-by-date?date=2026-03-02",
+              "query": [
+                { "key": "date", "value": "2026-03-02" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ]
+          }
+        },
+        {
+          "name": "4. Geçmiş (tarih aralığı)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/nutrition/history?startDate=2026-03-01&endDate=2026-03-02",
+              "query": [
+                { "key": "startDate", "value": "2026-03-01" },
+                { "key": "endDate",   "value": "2026-03-02" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ]
+          }
+        },
+        {
+          "name": "5. Log Sil",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/api/v1/nutrition/log/{{LOG_ID}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Food",
+      "item": [
+        {
+          "name": "1. Barkod Ara (Nutella)",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/v1/food/barcode/3017620422003",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ]
+          }
+        },
+        {
+          "name": "2. Barkod Ara (Coca-Cola)",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/v1/food/barcode/5449000000996",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ]
+          }
+        },
+        {
+          "name": "3. Görsel Analiz",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/food/analyze-image",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3002/health"
+          }
+        }
+      ]
+    }
+  ]
+}

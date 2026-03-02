@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(DATABASE_URL=\"postgresql://x:x@localhost:5432/x\" npx prisma:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker info:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(curl:*)",
+      "Bash(docker ps:*)",
+      "Bash(npx tsc:*)",
+      "Bash(# Gateway üzerinden test - geçerli token olmadan ne döndüğüne bakalım\ncurl -s \"http://localhost:8080/api/v1/nutrition/get-by-date?date=2026-03-02\" \\\\\n  -H \"Authorization: Bearer invalid_token\" | python3 -m json.tool 2>/dev/null)"
+    ]
+  }
+}

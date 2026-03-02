@@ -1,0 +1,24 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HealthData {
+  id             String   @id @default(uuid())
+  userId         String
+  date           DateTime
+  steps          Int?
+  heartRate      Int?     // bpm average
+  sleepHours     Float?
+  caloriesBurned Int?
+  source         String   // google_fit | apple_health | samsung_health | manual
+  syncedAt       DateTime @default(now())
+
+  @@unique([userId, date, source])
+  @@index([userId, date])
+}

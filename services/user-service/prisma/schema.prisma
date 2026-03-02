@@ -1,0 +1,77 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(uuid())
+  username          String?            @unique  // profil kurulumunda set edilir
+  email             String             @unique
+  password          String
+  firstName         String
+  lastName          String
+  isVerified        Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  profile           Profile?
+  streakData        StreakData?
+  chatHistory       ChatMessage[]
+  verificationCodes VerificationCode[]
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  userId    String
+  code      String
+  type      String   // email_verify | password_reset
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model Profile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  age               Int?
+  height            Float?   // cm
+  weight            Float?   // kg
+  targetWeight      Float?   // kg
+  gender            String?  // male | female | other
+  goal              String?  // lose_weight | gain_muscle | maintain | eat_healthy
+  activityLevel     String?  // sedentary | light | moderate | active | very_active
+  dietaryPreference String?  // omnivore | vegetarian | vegan | pescatarian
+  allergies         String[]
+  healthConditions  String[]
+  dailyCalorieGoal  Int?
+  dailyWaterGoal    Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StreakData {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  role      String   // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}

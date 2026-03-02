@@ -1,0 +1,26 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NutritionLog {
+  id       String   @id @default(uuid())
+  userId   String
+  foodName String
+  calories Float
+  protein  Float
+  carbs    Float
+  fat      Float
+  fiber    Float    @default(0)
+  mealType String   // breakfast | lunch | dinner | snack
+  source   String   // manual | barcode | photo | recipe
+  date     DateTime
+  loggedAt DateTime @default(now())
+
+  @@index([userId, date])
+}

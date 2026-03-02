@@ -1,0 +1,278 @@
+services:
+
+  # ============================================================
+  # API GATEWAY
+  # ============================================================
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - JWT_SECRET=${JWT_SECRET}
+      - USER_SERVICE_URL=http://user-service:3001
+      - NUTRITION_SERVICE_URL=http://nutrition-service:3002
+      - RECIPE_SERVICE_URL=http://recipe-service:3003
+      - HEALTH_SERVICE_URL=http://health-service:3004
+      - AI_SERVICE_URL=http://ai-service:3005
+      - SUBSCRIPTION_SERVICE_URL=http://subscription-service:3006
+    depends_on:
+      - user-service
+      - nutrition-service
+      - recipe-service
+      - health-service
+      - ai-service
+      - subscription-service
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  # ============================================================
+  # USER SERVICE  →  PostgreSQL (user_db)
+  # ============================================================
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3001
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@user-db:5432/user_db
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=user_db
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d user_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # NUTRITION SERVICE  →  PostgreSQL (nutrition_db) + MongoDB (food_db)
+  # ============================================================
+  nutrition-service:
+    build: ./services/nutrition-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3002
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@nutrition-db:5432/nutrition_db
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@food-db:27017/food_db?authSource=admin
+      - USER_SERVICE_URL=http://user-service:3001
+      - AI_SERVICE_URL=http://ai-service:3005
+      - SUBSCRIPTION_SERVICE_URL=http://subscription-service:3006
+    depends_on:
+      nutrition-db:
+        condition: service_healthy
+      food-db:
+        condition: service_healthy
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  nutrition-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=nutrition_db
+    volumes:
+      - nutrition-db-data:/var/lib/postgresql/data
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d nutrition_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  food-db:
+    image: mongo:7-jammy
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=food_db
+    volumes:
+      - food-db-data:/data/db
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # RECIPE SERVICE  →  MongoDB (recipe_db)
+  # ============================================================
+  recipe-service:
+    build: ./services/recipe-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3003
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@recipe-db:27017/recipe_db?authSource=admin
+      - USER_SERVICE_URL=http://user-service:3001
+      - NUTRITION_SERVICE_URL=http://nutrition-service:3002
+    depends_on:
+      recipe-db:
+        condition: service_healthy
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  recipe-db:
+    image: mongo:7-jammy
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=recipe_db
+    volumes:
+      - recipe-db-data:/data/db
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # HEALTH SERVICE  →  PostgreSQL (health_db)
+  # ============================================================
+  health-service:
+    build: ./services/health-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3004
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@health-db:5432/health_db
+      - USER_SERVICE_URL=http://user-service:3001
+    depends_on:
+      health-db:
+        condition: service_healthy
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  health-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=health_db
+    volumes:
+      - health-db-data:/var/lib/postgresql/data
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d health_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # AI SERVICE  →  (HAZIR — dokunma)
+  # ============================================================
+  ai-service:
+    build: ./services/ai-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3005
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  # ============================================================
+  # SUBSCRIPTION SERVICE  →  PostgreSQL (subscription_db)
+  # ============================================================
+  subscription-service:
+    build: ./services/subscription-service
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3006
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@subscription-db:5432/subscription_db
+      - JWT_SECRET=${JWT_SECRET}
+      - IYZICO_API_KEY=${IYZICO_API_KEY}
+      - IYZICO_SECRET_KEY=${IYZICO_SECRET_KEY}
+      - IYZICO_BASE_URL=${IYZICO_BASE_URL}
+      - IYZICO_WEBHOOK_SECRET=${IYZICO_WEBHOOK_SECRET}
+      - PRO_MONTHLY_PRICE=${PRO_MONTHLY_PRICE}
+      - PRO_YEARLY_PRICE=${PRO_YEARLY_PRICE}
+      - PRO_YEARLY_DISCOUNT=${PRO_YEARLY_DISCOUNT}
+      - PREMIUM_MONTHLY_PRICE=${PREMIUM_MONTHLY_PRICE}
+      - PREMIUM_YEARLY_PRICE=${PREMIUM_YEARLY_PRICE}
+      - PREMIUM_YEARLY_DISCOUNT=${PREMIUM_YEARLY_DISCOUNT}
+    depends_on:
+      subscription-db:
+        condition: service_healthy
+    networks:
+      - cimbil-network
+    restart: unless-stopped
+
+  subscription-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=subscription_db
+    volumes:
+      - subscription-db-data:/var/lib/postgresql/data
+    networks:
+      - cimbil-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d subscription_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# ============================================================
+# NETWORK
+# ============================================================
+networks:
+  cimbil-network:
+    driver: bridge
+
+# ============================================================
+# VOLUMES
+# ============================================================
+volumes:
+  user-db-data:
+  nutrition-db-data:
+  food-db-data:
+  recipe-db-data:
+  health-db-data:
+  subscription-db-data:

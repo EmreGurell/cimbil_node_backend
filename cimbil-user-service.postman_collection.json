@@ -1,0 +1,291 @@
+{
+  "info": {
+    "name": "Cimbil — User Service",
+    "_postman_id": "cimbil-user-service-v1",
+    "description": "User Service endpoint'leri. BASE_URL değişkenini ayarlayın: http://localhost:3001",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:8080" },
+    { "key": "TOKEN",    "value": "" },
+    { "key": "USER_ID",  "value": "" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "1. Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data.userId) {",
+                  "  pm.collectionVariables.set('USER_ID', json.data.userId);",
+                  "  console.log('USER_ID set:', json.data.userId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ahmet\",\n  \"lastName\": \"Yılmaz\",\n  \"email\": \"ahmet@test.com\",\n  \"password\": \"test1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data.token) {",
+                  "  pm.collectionVariables.set('TOKEN', json.data.token);",
+                  "  console.log('TOKEN set');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/verify-email",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{USER_ID}}\",\n  \"code\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Resend Code",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/resend-code",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{USER_ID}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data.token) {",
+                  "  pm.collectionVariables.set('TOKEN', json.data.token);",
+                  "  console.log('TOKEN set');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@test.com\",\n  \"password\": \"test1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5. Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/forgot-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@test.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "6. Reset Password",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/auth/reset-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@test.com\",\n  \"code\": \"123456\",\n  \"newPassword\": \"yeniSifre123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Profil",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/v1/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}" }]
+          }
+        },
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/users/profile",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ahmetyilmaz\",\n  \"age\": 28,\n  \"height\": 178,\n  \"weight\": 75,\n  \"targetWeight\": 70,\n  \"gender\": \"male\",\n  \"goal\": \"lose_weight\",\n  \"activityLevel\": \"moderate\",\n  \"dietaryPreference\": \"omnivore\",\n  \"allergies\": [\"gluten\"],\n  \"healthConditions\": []\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Profile (partial)",
+          "request": {
+            "method": "PUT",
+            "url": "{{BASE_URL}}/api/v1/users/profile",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weight\": 73,\n  \"activityLevel\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/v1/users/profile",
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Chat History",
+      "item": [
+        {
+          "name": "Get Chat History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/users/chat-history?limit=20",
+              "query": [
+                { "key": "limit",  "value": "20" },
+                { "key": "before", "value": "", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}" }]
+          }
+        },
+        {
+          "name": "Save Message (user)",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/users/chat-history",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"user\",\n  \"content\": \"Bugün ne yemeliyim?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Save Message (assistant)",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/users/chat-history",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"assistant\",\n  \"content\": \"Hedefine göre önerim: sabah yulaf, öğle ızgara tavuk ve sebze.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Clear Chat History",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/api/v1/users/chat-history",
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔥 Streak",
+      "item": [
+        {
+          "name": "Check Streak",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/v1/users/streak/check",
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Internal (servisler arası)",
+      "item": [
+        {
+          "name": "Get Internal Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/internal/profile/{{USER_ID}}"
+          }
+        },
+        {
+          "name": "Update Activity Level",
+          "request": {
+            "method": "PATCH",
+            "url": "{{BASE_URL}}/internal/profile/{{USER_ID}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityLevel\": \"active\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/health"
+          }
+        }
+      ]
+    }
+  ]
+}
