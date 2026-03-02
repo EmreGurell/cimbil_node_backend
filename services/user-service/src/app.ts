@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
 
-import { globalErrorHandler } from './utils/error.handler';
+import { globalErrorHandler, notFoundHandler } from './utils/error.handler';
 import { setupSwagger } from './docs/swagger';
 
 import authRoutes    from './routes/auth.routes';
@@ -35,7 +35,8 @@ app.use('/api/v1/users', chatRoutes);
 app.use('/api/v1/users', streakRoutes);
 app.use('/internal',     internalRoutes);
 
-// ── Global error handler ───────────────────────────────────
+// ── 404 + Global error handler ─────────────────────────────
+app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
 // ── Start ──────────────────────────────────────────────────
