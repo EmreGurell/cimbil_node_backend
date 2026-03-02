@@ -19,6 +19,7 @@ const createLogSchema = z.object({
   mealType: z.enum(MEAL_TYPES),
   date:     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD'),
   source:   z.enum(SOURCES).optional().default('manual'),
+  details:  z.array(z.record(z.unknown())).optional(),
 });
 
 // ── Controllers ────────────────────────────────────────────

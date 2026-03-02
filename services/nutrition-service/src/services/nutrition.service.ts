@@ -81,6 +81,7 @@ export async function createLog(
     mealType: string;
     date: string;
     source: string;
+    details?: Record<string, unknown>[];
   },
 ) {
   const entry = await prisma.nutritionLog.create({
@@ -94,6 +95,7 @@ export async function createLog(
       fiber:    body.fiber ?? 0,
       mealType: body.mealType,
       source:   body.source,
+      details:  body.details ?? undefined,
       date:     toUtcDay(body.date),
     },
   });
@@ -185,6 +187,7 @@ export async function createInternalLog(
     mealType: string;
     date: string;
     source: string;
+    details?: Record<string, unknown>[];
   },
 ) {
   const entry = await prisma.nutritionLog.create({
@@ -198,6 +201,7 @@ export async function createInternalLog(
       fiber:    body.fiber ?? 0,
       mealType: body.mealType,
       source:   body.source,
+      details:  body.details ?? undefined,
       date:     toUtcDay(body.date),
     },
   });

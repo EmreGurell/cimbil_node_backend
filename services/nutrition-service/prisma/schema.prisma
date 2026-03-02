@@ -19,6 +19,7 @@ model NutritionLog {
   fiber    Float    @default(0)
   mealType String   // breakfast | lunch | dinner | snack
   source   String   // manual | barcode | photo | recipe
+  details  Json?    // AI analizinden gelen detay array'i (opsiyonel)
   date     DateTime
   loggedAt DateTime @default(now())
 
