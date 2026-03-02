@@ -13,7 +13,8 @@ import { adminMiddleware } from './middleware/admin';
 const app = express();
 
 // ── Railway / reverse-proxy desteği ────────────────────────
-app.set('trust proxy', true);
+// 1 = Railway'in önündeki tek load balancer'a güven
+app.set('trust proxy', 1);
 
 // ── Logging ────────────────────────────────────────────────
 app.use(morgan('combined'));
