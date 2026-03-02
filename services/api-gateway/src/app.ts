@@ -12,6 +12,9 @@ import { adminMiddleware } from './middleware/admin';
 
 const app = express();
 
+// ── Railway / reverse-proxy desteği ────────────────────────
+app.set('trust proxy', true);
+
 // ── Logging ────────────────────────────────────────────────
 app.use(morgan('combined'));
 
@@ -21,13 +24,19 @@ app.get('/health', (_req, res) => {
 });
 
 // ── Servis URL'leri ────────────────────────────────────────
+// http:// prefix yoksa otomatik ekle (Railway env var'larında unutulabilir)
+function serviceUrl(envVar: string | undefined, fallback: string): string {
+  const url = envVar ?? fallback;
+  return url.startsWith('http') ? url : `http://${url}`;
+}
+
 const SERVICES = {
-  user:         process.env.USER_SERVICE_URL         ?? 'http://localhost:3001',
-  nutrition:    process.env.NUTRITION_SERVICE_URL    ?? 'http://localhost:3002',
-  recipe:       process.env.RECIPE_SERVICE_URL       ?? 'http://localhost:3003',
-  health:       process.env.HEALTH_SERVICE_URL       ?? 'http://localhost:3004',
-  ai:           process.env.AI_SERVICE_URL           ?? 'http://localhost:3005',
-  subscription: process.env.SUBSCRIPTION_SERVICE_URL ?? 'http://localhost:3006',
+  user:         serviceUrl(process.env.USER_SERVICE_URL,         'http://localhost:3001'),
+  nutrition:    serviceUrl(process.env.NUTRITION_SERVICE_URL,    'http://localhost:3002'),
+  recipe:       serviceUrl(process.env.RECIPE_SERVICE_URL,       'http://localhost:3003'),
+  health:       serviceUrl(process.env.HEALTH_SERVICE_URL,       'http://localhost:3004'),
+  ai:           serviceUrl(process.env.AI_SERVICE_URL,           'http://localhost:3005'),
+  subscription: serviceUrl(process.env.SUBSCRIPTION_SERVICE_URL, 'http://localhost:3006'),
 } as const;
 
 // ── Proxy factory ──────────────────────────────────────────
