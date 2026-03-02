@@ -827,6 +827,34 @@ POST nutrition-service:3002/internal/log
 - Chat geçmişi User Service'te tutulur, AI Service'e her istekte
   son 10 mesaj + userProfile gönderilir
 
+## RAILWAY DEPLOYMENT NOTLARI
+
+### Private Networking
+- Servisler arası iletişim: `http://<railway-internal-hostname>:PORT`
+- Railway her servise otomatik internal hostname atar (örn: `outstanding-cat.railway.internal`)
+- Internal hostname → Railway dashboard → servis → Settings → Networking → Private Domain
+- Servisler aynı proje + aynı environment'ta olmalı
+
+### Port
+- Railway `PORT` env var'ını otomatik inject eder (genellikle 8080)
+- Servisler `process.env.PORT || <default>` ile dinler
+- Internal URL'lerde Railway'in atadığı PORT kullanılmalı (default 3001/3002 değil, 8080)
+
+### API Gateway Özel Ayarlar
+- `app.set('trust proxy', 1)` — Railway reverse proxy arkasında çalışır, rate-limit için zorunlu
+- `serviceUrl()` helper: env var'a `http://` prefix'i unutulursa otomatik ekler, `.trim()` ile boşluk temizler
+- Tüm servis URL'leri `*_SERVICE_URL` env var'larından okunur
+
+### Veritabanları
+- Her servis için ayrı PostgreSQL Railway'e eklenmeli (Database → Add PostgreSQL)
+- `DATABASE_URL` her servisin Variables sekmesine ayrı ayrı girilmeli
+- MongoDB için Railway'e MongoDB plugin yok → Dışarıdan (MongoDB Atlas vb.) kullanılmalı
+
+### NutritionLog — details alanı
+- `details Json?` alanı eklendi (opsiyonel)
+- AI fotoğraf analizi sonuçlarını saklamak için kullanılır
+- Prisma migration (`prisma migrate deploy`) Railway'de çalıştırılmalı
+
 ## İLK GÖREVİN
 
 1. Önce projenin tamamı için detaylı bir TODO listesi oluştur.

@@ -1,6 +1,6 @@
 # Cimbil Backend - Task Listesi
 
-Son güncelleme: 2026-03-02
+Son güncelleme: 2026-03-02 (Railway deploy session)
 Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.json'una sahip. Multi-stage Dockerfile.
 
 ## Durum Açıklaması
@@ -26,6 +26,7 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
   - Public route'ları bypass et, diğerlerinde JWT doğrula, x-user-id header ekle
 - [x] **#4** Rate limiting
   - /login, /register, /forgot-password → 10 req/dk | Diğerleri → 100 req/dk
+  - `app.set('trust proxy', 1)` eklendi — Railway reverse proxy uyumluluğu
 - [x] **#5** Subscription middleware
   - Korunan feature route'ları: food_analysis, ai_chat, recipes, barcode_scan, health_sync
   - check → proxy → increment akışı, limit aşıldığında 403 LIMIT_REACHED
@@ -79,6 +80,10 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
   - GET /food/barcode/:barcode: MongoDB cache → Open Food Facts API → kaydet
   - POST /food/analyze-image: Multer → base64 → AI Service /analyze-image
   - POST /internal/log: Recipe Service'ten gelen log
+- [x] **#17a** NutritionLog'a `details Json?` alanı eklendi
+  - AI fotoğraf analizi sonuçlarını saklamak için opsiyonel JSON array
+  - createLog ve createInternalLog her ikisi de destekliyor
+  - ⚠️ Railway'de `prisma migrate deploy` çalıştırılmalı
 
 ---
 
@@ -132,6 +137,29 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
 
 ---
 
+## 🚀 Railway Deployment
+
+- [~] **#26** User Service Railway deploy
+  - [x] Private networking URL'leri ayarlandı (outstanding-cat.railway.internal:8080)
+  - [x] `notFoundHandler` eklendi (JSON 404 yanıtı)
+  - [x] Auth controller'a hata loglama eklendi
+  - [ ] Railway'de DATABASE_URL (PostgreSQL) set edilmeli
+  - [ ] Railway'de JWT_SECRET, SMTP env var'ları set edilmeli
+  - [ ] Prisma migrate deploy çalıştırılmalı
+- [~] **#27** Nutrition Service Railway deploy
+  - [x] Private networking URL'leri ayarlandı (romantic-rebirth.railway.internal:8080)
+  - [ ] Railway'de DATABASE_URL (PostgreSQL) set edilmeli
+  - [ ] Railway'de FOOD_MONGODB_URI set edilmeli
+  - [ ] Prisma migrate deploy çalıştırılmalı (details kolonu için)
+- [ ] **#28** API Gateway Railway deploy
+  - [x] Trust proxy ayarı düzeltildi
+  - [x] serviceUrl() helper eklendi (http:// prefix + trim)
+  - [x] Servis URL'leri Railway internal adresleriyle güncellendi
+  - [ ] Recipe, Health, AI, Subscription servisleri deploy edildiğinde URL'leri güncelle
+
+---
+
 ## 📊 İlerleme
 
 Tamamlanan: 20 / 25  (TypeScript dönüşümü dahil, #20 yarım)
+Railway deploy: 2 / 6 servis deploy edildi (user, nutrition), DB env var'ları eksik

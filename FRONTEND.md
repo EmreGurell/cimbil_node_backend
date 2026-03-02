@@ -1,7 +1,7 @@
 # Cimbil — Flutter Entegrasyon Rehberi
 
-Base URL: `http://<SERVER_IP>:8080` (API Gateway)
-Dev: `http://10.0.2.2:8080` (Android emulator) | `http://localhost:8080` (iOS sim)
+Base URL (Production): `https://api-gateway-production-fd99.up.railway.app`
+Base URL (Local Dev): `http://10.0.2.2:8080` (Android emulator) | `http://localhost:8080` (iOS sim)
 
 ---
 
@@ -316,7 +316,8 @@ Authorization: Bearer <token>
         "calories": 350, "protein": 12, "carbs": 55, "fat": 7, "fiber": 5,
         "mealType": "breakfast",
         "source": "manual",
-        "loggedAt": "..."
+        "loggedAt": "...",
+        "details": null
       }
     ]
   }
@@ -341,12 +342,23 @@ Authorization: Bearer <token>
   "fiber": 5,
   "mealType": "breakfast",
   "date": "2026-03-02",
-  "source": "manual"
+  "source": "manual",
+  "details": [
+    {
+      "isim": "Yulaf Ezmesi",
+      "kalori": 350,
+      "hesaplanan_gram": 80,
+      "tahmini_hacim_cm3": 150,
+      "besin_notu": "Kuru yulaf 80g, pişmiş hali yaklaşık 200g."
+    }
+  ]
 }
 ```
 
 **`mealType` değerleri:** `breakfast` | `lunch` | `dinner` | `snack`
 **`source` değerleri:** `manual` | `barcode` | `photo` | `recipe`
+
+> `details` opsiyoneldir. Fotoğraf analizi ile eklenen loglarda AI'ın döndürdüğü detay array'ini buraya ilet. Manuel ve barkod girişlerinde göndermene gerek yok.
 
 ---
 
