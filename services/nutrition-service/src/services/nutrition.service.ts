@@ -95,7 +95,8 @@ export async function createLog(
       fiber:    body.fiber ?? 0,
       mealType: body.mealType,
       source:   body.source,
-      details:  body.details ?? undefined,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      details:  body.details as any ?? undefined,
       date:     toUtcDay(body.date),
     },
   });
@@ -201,7 +202,8 @@ export async function createInternalLog(
       fiber:    body.fiber ?? 0,
       mealType: body.mealType,
       source:   body.source,
-      details:  body.details ?? undefined,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      details:  body.details as any ?? undefined,
       date:     toUtcDay(body.date),
     },
   });
