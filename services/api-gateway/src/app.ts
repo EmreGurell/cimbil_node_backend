@@ -27,7 +27,7 @@ app.get('/health', (_req, res) => {
 // ── Servis URL'leri ────────────────────────────────────────
 // http:// prefix yoksa otomatik ekle (Railway env var'larında unutulabilir)
 function serviceUrl(envVar: string | undefined, fallback: string): string {
-  const url = envVar ?? fallback;
+  const url = (envVar ?? fallback).trim();
   return url.startsWith('http') ? url : `http://${url}`;
 }
 
