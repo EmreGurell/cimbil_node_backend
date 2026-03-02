@@ -58,6 +58,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[register] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
@@ -80,6 +81,7 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[verifyEmail] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
@@ -99,6 +101,7 @@ export async function resendCode(req: Request, res: Response): Promise<void> {
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[resendCode] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
@@ -118,6 +121,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[login] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
@@ -137,6 +141,7 @@ export async function forgotPassword(req: Request, res: Response): Promise<void>
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[forgotPassword] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
@@ -160,6 +165,7 @@ export async function resetPassword(req: Request, res: Response): Promise<void> 
       errorResponse(res, err.message, err.code, err.status);
       return;
     }
+    console.error('[resetPassword] Unexpected error:', err);
     errorResponse(res, 'Internal server error', 'INTERNAL_ERROR', 500);
   }
 }
