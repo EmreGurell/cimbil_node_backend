@@ -17,6 +17,7 @@ export function errorResponse(
   message: string,
   code: string,
   status = 400,
+  data?: Record<string, unknown>,
 ): void {
-  res.status(status).json({ success: false, message, code });
+  res.status(status).json({ success: false, message, code, ...(data && { data }) });
 }

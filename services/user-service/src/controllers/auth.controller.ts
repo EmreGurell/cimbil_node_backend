@@ -118,7 +118,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     successResponse(res, data);
   } catch (err) {
     if (err instanceof AppError) {
-      errorResponse(res, err.message, err.code, err.status);
+      errorResponse(res, err.message, err.code, err.status, err.data);
       return;
     }
     console.error('[login] Unexpected error:', err);

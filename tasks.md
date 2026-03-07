@@ -1,6 +1,6 @@
 # Cimbil Backend - Task Listesi
 
-Son güncelleme: 2026-03-02 (Railway deploy session)
+Son güncelleme: 2026-03-02
 Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.json'una sahip. Multi-stage Dockerfile.
 
 ## Durum Açıklaması
@@ -47,9 +47,10 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
   - register: email unique, bcrypt hash, user oluştur, 6 haneli kod, email gönder
   - verify-email: kod doğrula, isVerified=true, süresiz JWT üret
   - resend-code: eski kodları iptal, yeni kod + email
+  - ⚡ Email gönderimi fire-and-forget yapıldı — response'u bloke etmez, timeout sorunu çözüldü
 - [x] **#10** Auth endpoints — login / forgot-password / reset-password
   - login: user bul, isVerified kontrol, bcrypt.compare, JWT üret
-  - forgot-password: 6 haneli kod (password_reset, 15dk), email
+  - forgot-password: 6 haneli kod (password_reset, 15dk), email — fire-and-forget
   - reset-password: kod doğrula, şifre güncelle
 - [x] **#11** Profile endpoints + Swagger UI + Prisma Studio script
   - POST /profile: username unique, Mifflin-St Jeor kalori hesabı, dailyWaterGoal=weight*35, upsert
@@ -103,13 +104,15 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
 
 ## 🏃 Health Service (:3004) — PostgreSQL (health_db) / Prisma
 
-- [~] **#20** Proje iskeleti + Prisma schema  ← yarım kaldı (package.json, tsconfig, Dockerfile, schema yazıldı; app.ts eksik)
+- [x] **#20** Proje iskeleti + Prisma schema
   - package.json (express, prisma, axios, zod)
   - HealthData modeli (@@unique([userId, date, source]))
-- [ ] **#21** Tüm endpoint'ler
-  - POST /health/sync: upsert, steps→activityLevel → User Service PATCH /internal/profile/:userId
-  - GET /health/today, GET /health/history?days=7
-  - POST /health/manual
+- [x] **#21** Tüm endpoint'ler
+  - POST /health/sync: upsert, steps→activityLevel → User Service PATCH /internal/profile/:userId (fire-and-forget)
+  - GET /health/today: tüm source'lardan merge edilmiş bugünkü veri
+  - GET /health/history?days=7: gün bazında gruplu özet (max 90 gün)
+  - POST /health/manual: source=manual ile syncHealth'i çağırır
+  - ⚠️ /sync endpoint'i kontrol edilecek
 
 ---
 
@@ -161,5 +164,5 @@ Not: Proje TypeScript ile yazılıyor (strict mode). Her servis kendi tsconfig.j
 
 ## 📊 İlerleme
 
-Tamamlanan: 20 / 25  (TypeScript dönüşümü dahil, #20 yarım)
+Tamamlanan: 22 / 25
 Railway deploy: 2 / 6 servis deploy edildi (user, nutrition), DB env var'ları eksik

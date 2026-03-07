@@ -131,13 +131,34 @@ export async function login(email: string, password: string) {
   if (!user) {
     throw new AppError('User not found', 'USER_NOT_FOUND', 404);
   }
-  if (!user.isVerified) {
-    throw new AppError('Email not verified', 'EMAIL_NOT_VERIFIED', 403);
-  }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError('Invalid credentials', 'INVALID_CREDENTIALS', 401);
+  }
+
+  if (!user.isVerified) {
+    // Eski kodları iptal et, yeni kod gönder
+    await prisma.verificationCode.updateMany({
+      where: { userId: user.id, type: 'email_verify', used: false },
+      data: { used: true },
+    });
+
+    const code = generateCode();
+    await prisma.verificationCode.create({
+      data: {
+        userId: user.id,
+        code,
+        type: 'email_verify',
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    });
+
+    sendVerificationEmail(email, user.firstName, code).catch((err) => {
+      console.error('[login] Email send failed:', err.message);
+    });
+
+    throw new AppError('Email not verified', 'EMAIL_NOT_VERIFIED', 403, { userId: user.id });
   }
 
   const token = generateToken(user.id, user.email);
